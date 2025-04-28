@@ -19,6 +19,8 @@ set -x
 
 HELM="${LOCALBIN}/helm"
 E2E_DIR="$(pwd)"
+# 默认为false，可以通过环境变量覆盖
+AGGRESSIVE_PUSH="${AGGRESSIVE_PUSH:-false}"
 
 install() {
     OPTIONS_DISABLED="$1"
@@ -32,6 +34,25 @@ install() {
 
     CONTROLLER_VALUES_OPT="-f $E2E_DIR/htnn_controller_values.yaml"
     GATEWAY_VALUES_OPT="-f $E2E_DIR/htnn_gateway_values.yaml"
+
+    # 如果启用了积极推送模式，生成包含相应配置的istio-values.yaml
+    if [ "$AGGRESSIVE_PUSH" = "true" ]; then
+        cat > $E2E_DIR/istio-values.yaml <<EOF
+pilot:
+  env:
+    # 减少推送延迟时间
+    PILOT_DEBOUNCE_AFTER: "10ms"
+    # 减少最大延迟时间
+    PILOT_DEBOUNCE_MAX: "1s"
+    # 禁用EDS推送延迟
+    PILOT_ENABLE_EDS_DEBOUNCE: "false"
+    # 增加并发推送数量
+    PILOT_PUSH_THROTTLE: "200"
+EOF
+        CONTROLLER_VALUES_OPT="$CONTROLLER_VALUES_OPT -f $E2E_DIR/istio-values.yaml"
+        echo "Enabled aggressive push mode for istiod"
+    fi
+
     if [ -n "$OPTIONS_DISABLED" ]; then
         CONTROLLER_VALUES_OPT=
         GATEWAY_VALUES_OPT=

@@ -60,6 +60,10 @@ e2e-prepare-data-plane-image: kind
 deploy-istio: helm
 	ISTIO_VERSION=$(ISTIO_VERSION) LOCALBIN=$(LOCALBIN) ./istio.sh install
 
+.PHONY: deploy-istio-aggressive
+deploy-istio-aggressive: helm
+	AGGRESSIVE_PUSH=true ISTIO_VERSION=$(ISTIO_VERSION) LOCALBIN=$(LOCALBIN) ./istio.sh install
+
 .PHONY: deploy-istio-to-verify-helm-install
 deploy-istio-to-verify-helm-install: helm
 	ISTIO_VERSION=$(ISTIO_VERSION) LOCALBIN=$(LOCALBIN) ./istio.sh installWithoutOptions
@@ -75,3 +79,7 @@ run-e2e:
 .PHONY: e2e-ci
 e2e-ci: delete-cluster create-cluster e2e-prepare-data-plane-image \
 	e2e-prepare-controller-image deploy-istio run-e2e
+
+.PHONY: e2e-aggressive
+e2e-aggressive: delete-cluster create-cluster e2e-prepare-data-plane-image \
+	e2e-prepare-controller-image deploy-istio-aggressive run-e2e

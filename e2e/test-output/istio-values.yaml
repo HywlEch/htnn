@@ -1,0 +1,10 @@
+pilot:
+  env:
+    # 减少推送延迟时间
+    PILOT_DEBOUNCE_AFTER: "10ms"
+    # 减少最大延迟时间
+    PILOT_DEBOUNCE_MAX: "1s"
+    # 禁用EDS推送延迟
+    PILOT_ENABLE_EDS_DEBOUNCE: "false"
+    # 增加并发推送数量
+    PILOT_PUSH_THROTTLE: "200"
